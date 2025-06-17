@@ -8,7 +8,7 @@ Contact: nikos.konstantinides@ijm.fr
 
 ---
 
-## 🧬 Overview
+## Overview
 
 This repository contains the code used to spatially reconstruct and analyze single-cell gene expression patterns during the development of the **Drosophila optic lobe**. It integrates single-cell transcriptomics with computational spatial inference, allowing users to:
 
@@ -18,7 +18,7 @@ This repository contains the code used to spatially reconstruct and analyze sing
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 Clone the repository and install the required packages.
 
@@ -61,11 +61,8 @@ Example input/output data and config files are provided in the `/examples` direc
 .
 ├── src/                  # Core source code
 ├── notebooks/            # Jupyter notebooks for exploration and figures
-├── configs/              # YAML configuration files for each run
 ├── data/                 # Sample data (see README in folder)
-├── results/              # Example outputs
-├── environment.yml       # Conda environment
-├── requirements.txt      # Python packages
+├── scripts/              # Preprocessing steps
 └── README.md             # This file
 ```
 
@@ -81,13 +78,12 @@ This project is licensed under the [MIT License](LICENSE).
 
 If you use this code, please cite:
 
-> Nikos X et al. (2025)  
-> *Gene expression cartography of a developing neuronal structure*. bioRxiv.  
-> [DOI: 10.xxxx/xxxxxx](https://doi.org/xx.xxxx/xxxxxx)
+> Leonardo Tadini, Lilia Younsi, Isabel Holguera, Félix Simon, Maximilien Courgeon, Nikos Konstantinides (2025)
+> *Gene expression cartography of a developing neuronal structure*. bioRxiv 2025.03.30.646184; doi: https://doi.org/10.1101/2025.03.30.646184
 
 ---
 
 ## 🙋 Acknowledgements
 
-Developed in the [Your Lab Name], with support from [Funding Body, if applicable].  
-Built on top of tools like [novoSpaRc](https://github.com/rajewsky-lab/novosparc), [scanpy](https://github.com/scverse/scanpy), and others.
+Developed in the Konstantinides lab of the Institut Jacques Monod, with support by the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (grant agreement No. 949500) and the HORIZON-WIDERA-2023-ACCESS-02 grant no. 101159925 - SCENTINEL..  
+Built on top of tools like [novoSpaRc](https://github.com/rajewsky-lab/novosparc), and others.
