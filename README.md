@@ -41,8 +41,7 @@ Example input/output data and config files are provided in the `/examples` direc
 ```
 .
 ├── src/                  # Core source code
-├── notebooks/            # Jupyter notebooks for exploration and figures
-├── data/                 # Sample data (see README in folder)
+├── data/                 # Sample data
 ├── scripts/              # Preprocessing steps
 └── README.md             # This file
 ```
