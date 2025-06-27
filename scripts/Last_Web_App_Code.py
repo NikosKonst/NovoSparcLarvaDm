@@ -13,6 +13,7 @@ from io import BytesIO
 from PIL import Image
 import io
 from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
 
 # Load your normalized CSV data
 data_path = 'lessDecimals.csv'
@@ -52,9 +53,33 @@ app = dash.Dash(__name__)
 # Define the layout
 
 app.layout = html.Div([
-    html.H1("3D Novosparc Reconstruction of Drosophila Developing Optic Lobe single cell data", style={'text-align': 'center'}),
+    html.H1([
+        "3D Novosparc reconstruction of ",
+        html.Em("Drosophila"),
+        " developing optic lobe single-cell mRNA sequencing data"
+    ], style={'textAlign': 'center'}),
 
     html.Div([
+        html.H2("Basic instructions for use", style={'margin-bottom': '7px'}),
+        html.P(
+            "This tool allows you to explore transcript expression in the developing fly optic lobe. It is the reconstruction of the single-cell mRNA sequencing data presented in (Konstantinides, Holguera, Rossi, et al PMID: 35388222)."),
+        html.P(
+            "Step 1: select your gene of interest from the drop-down. You will immediately get the top 20 most correlated genes (based on Spearman rank correlation coefficient), as well as the expression distribution of this gene."),
+        html.P(
+            "Step 2: select a color to display this gene and the threshold for visualization. Since every gene's expression distribution varies, this choice should rely on the distribution displayed above. The default value for the lower threshold of 0.5 is a possible starting point."),
+        html.P(
+            "Bonus: if you want to visualize a second or a third gene, click on the relative box and repeat steps 1 and 2."),
+        html.P("Step 3: press 'Refresh scatter plot' and explore the expression of your gene(s) of interest in the half-sphere of the developing optic lobe."),
+    html.P(
+        "Step 4: perform sections along the x-, y-, and z-axes using the filters, that allow you to adjust which part of the structure you want to visualize."),
+    html.P("Step 5: select to visualize only part of the cells based on the genes they express, using the 'Filter by Colors' function. Note that k-means clustering is used to divide the cells in 2, 4 or 8 clusters depending on whether you choose to visualize 1, 2, or 3 genes. The color code of the clusters depends on the expression levels of the genes."),
+    html.P("Step 6: finally, you can download the filtered cells' reconstructed expression and coordinates, using the 'Download Displayed Data' button."),
+        html.P(
+            "If you use this tool, please cite: Tadini et al, biorxiv, 2025.03.30.646184; doi: https://doi.org/10.1101/2025.03.30.646184"),
+        html.P("Please address feedback to nikos(dot)konstantinides(at)ijm(dot)fr"),
+    ], style = {'paddingTop': '3px', 'paddingBottom': '10px', 'backgroundColor': '#F0F8FF'}),
+
+html.Div([
         # First gene settings
         html.Div([
             html.Label("Select the first gene:", style={'font-weight': 'bold'}),
@@ -87,13 +112,13 @@ app.layout = html.Div([
             ),
             html.Label("Set thresholds for visualizing the first gene:", style={'font-weight': 'bold'}),
             html.Div([
-                dcc.Input(id='threshold-min-1', type='number', value=0, min=0, max=1, step=0.01,
+                dcc.Input(id='threshold-min-1', type='number', value=0.5, min=0, max=1, step=0.01,
                           style={'width': '48%', 'margin-right': '5px'}),
                 dcc.Input(id='threshold-max-1', type='number', value=1, min=0, max=1, step=0.01,
                           style={'width': '48%'})
             ], style={'display': 'flex', 'margin-bottom': '15px'}),
         ], style={'width': '48%', 'display': 'inline-block'})
-    ], style={'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '30px'}),
+    ], style={'paddingTop': '10px', 'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '30px'}),
 
     # Second gene settings
     html.Div([
@@ -134,7 +159,7 @@ app.layout = html.Div([
             ),
             html.Label("Set thresholds for visualizing the second gene:", style={'font-weight': 'bold'}),
             html.Div([
-                dcc.Input(id='threshold-min-2', type='number', value=0, min=0, max=1, step=0.01,
+                dcc.Input(id='threshold-min-2', type='number', value=0.5, min=0, max=1, step=0.01,
                           style={'width': '48%', 'margin-right': '5px'}),
                 dcc.Input(id='threshold-max-2', type='number', value=1, min=0, max=1, step=0.01,
                           style={'width': '48%'})
@@ -182,7 +207,7 @@ app.layout = html.Div([
             ),
             html.Label("Set thresholds for visualizing the third gene:", style={'font-weight': 'bold'}),
             html.Div([
-                dcc.Input(id='threshold-min-3', type='number', value=0, min=0, max=1, step=0.01,
+                dcc.Input(id='threshold-min-3', type='number', value=0.5, min=0, max=1, step=0.01,
                           style={'width': '48%', 'margin-right': '5px'}),
                 dcc.Input(id='threshold-max-3', type='number', value=1, min=0, max=1, step=0.01,
                           style={'width': '48%'})
@@ -527,9 +552,18 @@ def update_color_checkboxes(refresh_clicks, selected_gene1, color1, threshold_mi
     blended_colors = np.clip(blended_colors, 0, 1)
 
     # K-Means clustering
-    kmeans = KMeans(n_clusters=8, random_state=42)
+    num_enabled_genes = 1 + ('enable' in second_gene_enabled) + ('enable' in third_gene_enabled)
+    num_clusters = {1: 2, 2: 4, 3: 8}.get(num_enabled_genes, 8)
+
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     clustered_colors = kmeans.fit_predict(blended_colors)
     dominant_colors = kmeans.cluster_centers_
+
+   # GMM clustering
+   # gmm = GaussianMixture(n_components=8, random_state=42)
+   # gmm.fit(blended_colors)
+   # clustered_colors = gmm.predict(blended_colors)
+   # dominant_colors = gmm.means_
 
     # Ensure all values in dominant_colors are within [0, 1]
     dominant_colors = np.clip(dominant_colors, 0, 1)
@@ -645,7 +679,10 @@ def update_3d_scatter_and_download(
         }, None
 
     # K-Means clustering
-    kmeans = KMeans(n_clusters=8, random_state=42)
+    num_enabled_genes = 1 + ('enable' in second_gene_enabled) + ('enable' in third_gene_enabled)
+    num_clusters = {1: 2, 2: 4, 3: 8}.get(num_enabled_genes, 8)
+
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     clustered_colors = kmeans.fit_predict(blended_colors)
     dominant_colors = kmeans.cluster_centers_
 
@@ -757,4 +794,4 @@ def update_camera(view_x, view_neg_x, view_y, view_neg_y, view_z, view_neg_z, cu
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8052)
+    app.run(debug=True, port=8050)
