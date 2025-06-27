@@ -18,24 +18,6 @@ This repository contains the code used to spatially reconstruct and analyze sing
 
 ---
 
-## Usage
-
-Run the main reconstruction pipeline:
-
-```bash
-python run_cartography.py --config configs/optic_lobe.yaml
-```
-
-Or explore results interactively via Jupyter:
-
-```bash
-jupyter notebook notebooks/optic_lobe_reconstruction.ipynb
-```
-
-Example input/output data and config files are provided in the `/examples` directory.
-
----
-
 ## Repository Structure
 
 ```
