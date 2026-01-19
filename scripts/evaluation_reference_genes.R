@@ -2,14 +2,20 @@
   library(ggplot2)
   library(tidyr)
   
-  atlas<-read.csv("Last_ATLAS.csv")
+  setwd("~/Seafile/Konstantinides_lab/Konstantinides_lab_papers/drafts/Leonardo_paper/revised_DEVELOPMENTAL_BIOLOGY/")
+  atlas<-read.csv("~/Seafile/Konstantinides_lab/Konstantinides_lab_papers/drafts/Leonardo_paper/GitHub_page/NovoSparcLarvaDm/data/Last_ATLAS.csv")
   atlas[,1:3]<-round(atlas[,1:3], digits = 3)
   head(atlas)
-  lessDecimals<-read.csv("lessDecimals.csv")
+  lessDecimals<-read.csv("../Novosparc_WebApp/lessDecimals.csv")
   marker_genes <- read.table("marker_genes.txt", header = F)
   
   results<-matrix(nrow = dim(marker_genes)[1], ncol = 2)
   colnames(results)<-c("precision", "recall")
+  rownames(results)<-marker_genes[,1]
+  
+  results2<-matrix(nrow = dim(marker_genes)[1], ncol = 5)
+  colnames(results2)<-c("TP", "FP", "TN", "FN", "F1_score")
+  rownames(results2)<-marker_genes[,1]
   
   for (j in 1:dim(marker_genes)[1]) {
   gene_of_interest<-marker_genes[j,1]
@@ -45,13 +51,24 @@
   
   precision=k/i # this is TP/TP+FP (precision)
   recall=k/sum(atlas[,gene_of_interest]) # this is TP/TP+FN (recall/sensitivity)
+  TP=k
+  FP=i-k
+  FN=sum(atlas[,gene_of_interest])-k
+  TN=dim(reconstruction_pre)[1]-(TP+FP+FN)
+  F1_score <- ifelse((precision + recall) == 0, 0, 2 * (precision * recall) / (precision + recall))
   
   results[j,1]<-precision
   results[j,2]<-recall
+  results2[j,1]<-TP
+  results2[j,2]<-FP
+  results2[j,3]<-TN
+  results2[j,4]<-FN
+  results2[j,5]<-F1_score
   print(j)
   }
   
   write.table(results, file = "precision_recall_markers.txt", quote=F, sep = "\t")
+  write.table(results2, file = "../revised_DEVELOPMENTAL_BIOLOGY_round3/F1_score_markers.txt", quote=F, sep = "\t")
   
   
   # plot
@@ -61,25 +78,7 @@
                                names_to = "metric",
                                values_to = "value")
   
-  
-  ### PLOT OPTION 1
-  ggplot(results_long, aes(x = metric, y = value, fill = metric)) +
-    geom_boxplot(width = 0.3, alpha = 0.8, outlier.alpha = 0.3, color = "black", linewidth = 0.3) +
-    scale_fill_manual(values = c(
-      "precision" = "#377eb8",   # stronger blue
-      "recall"    = "grey70"     # subtle grey
-    )) +
-    labs(
-      title = "Precision and Recall Across Non Reference Genes",
-      x = "",
-      y = "Value"
-    ) +
-    theme_minimal(base_size = 14) +
-    theme(
-      legend.position = "none",
-      plot.title = element_text(face = "bold", size = 16)
-    )
-  
+
   ### PLOT OPTION 2
   p <- ggplot(results_long, aes(x = metric, y = value, fill = metric)) +
     geom_violin(width = 0.5, alpha = 0.4, color = "grey60") +

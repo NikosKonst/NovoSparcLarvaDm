@@ -2,7 +2,8 @@
   library(ggplot2)
   library(tidyr)
   
-  atlas<-read.csv("Last_ATLAS.csv")
+  setwd("~/Seafile/Konstantinides_lab/Konstantinides_lab_papers/drafts/Leonardo_paper/revised_DEVELOPMENTAL_BIOLOGY/")
+  atlas<-read.csv("~/Seafile/Konstantinides_lab/Konstantinides_lab_papers/drafts/Leonardo_paper/GitHub_page/NovoSparcLarvaDm/data/Last_ATLAS.csv")
   atlas[,1:3]<-round(atlas[,1:3], digits = 3)
   coords<-round(atlas[,1:3], digits = 3)
   head(atlas)
@@ -80,23 +81,6 @@
                                values_to = "value")
   
   
-  ### PLOT OPTION 1
-  ggplot(results_long, aes(x = metric, y = value, fill = metric)) +
-    geom_boxplot(width = 0.3, alpha = 0.8, outlier.alpha = 0.3, color = "black", linewidth = 0.3) +
-    scale_fill_manual(values = c(
-      "precision" = "#377eb8",   # stronger blue
-      "recall"    = "grey70"     # subtle grey
-    )) +
-    labs(
-      title = "Precision and Recall Across Non Reference Genes",
-      x = "",
-      y = "Value"
-    ) +
-    theme_minimal(base_size = 14) +
-    theme(
-      legend.position = "none",
-      plot.title = element_text(face = "bold", size = 16)
-    )
   
   ### PLOT OPTION 2
   p <- ggplot(results_long, aes(x = metric, y = value, fill = metric)) +
